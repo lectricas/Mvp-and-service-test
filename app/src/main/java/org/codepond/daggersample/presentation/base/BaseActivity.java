@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package org.codepond.daggersample.feature;
+package org.codepond.daggersample.presentation.base;
 
-interface FeatureView {
-    void doNothing();
+/**
+ * Created by lectricas on 05.07.2017.
+ */
+
+public class BaseActivity {
 }

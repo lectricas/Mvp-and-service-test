@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package org.codepond.daggersample;
+package org.codepond.daggersample.presentation.base;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
+import com.arellomobile.mvp.MvpPresenter;
+import com.arellomobile.mvp.MvpView;
 
-import org.codepond.daggersample.feature.FeatureActivity;
+/**
+ * Created by lectricas on 05.07.2017.
+ */
 
-public class MainActivity extends Activity {
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Intent intent = new Intent(this, FeatureActivity.class);
-        intent.putExtra(FeatureActivity.EXTRA_SOME_ID, "id_1");
-        startActivity(intent);
-    }
+public class BasePresenter<V extends MvpView> extends MvpPresenter<V> {
 }

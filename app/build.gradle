@@ -1,26 +1,38 @@
 apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "org.codepond.daggersample"
-        minSdkVersion 21
+        minSdkVersion 19
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
+            buildConfigField("String", "BASE_URL", '"https://foraserver.herokuapp.com/"')
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            minifyEnabled false
+            buildConfigField("String", "BASE_URL", '"https://foraserver.herokuapp.com/"')
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.3.0'
+
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     annotationProcessor 'com.google.dagger:dagger-compiler:2.10'
@@ -29,4 +41,29 @@ dependencies {
 // Uncomment if you're not using support library and remove 'dagger-android-support' below
 //    compile 'com.google.dagger:dagger-android:2.10'
     compile 'com.google.dagger:dagger-android-support:2.10'
+
+    compile libraries.supportAppCompat
+    compile libraries.supportDesign
+
+    compile libraries.lombok
+
+
+    provided libraries.javaxAnnotation
+
+    compile libraries.moxy
+    compile libraries.moxyAppCompat
+    annotationProcessor libraries.moxyCompiler
+
+    compile libraries.butterknife
+    annotationProcessor libraries.butterknifeAnnotationProcessor
+
+    compile libraries.rxJava2
+    compile libraries.rxAndroid
+    compile libraries.rxBinding
+    retrolambdaConfig libraries.retrolambdaConfig
+
+    compile libraries.retrofit
+    compile libraries.retrofitAdapter
+    compile libraries.retrofitConverter
+    compile libraries.okHttpLoggingInterceptor
 }

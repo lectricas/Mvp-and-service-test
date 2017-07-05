@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package org.codepond.daggersample.feature;
+package org.codepond.daggersample.presentation.main.di;
 
-import javax.inject.Named;
+import org.codepond.daggersample.presentation.main.MainActivity;
 
-import dagger.Binds;
-import dagger.Module;
-import dagger.Provides;
+import dagger.Subcomponent;
+import dagger.android.AndroidInjector;
 
 /**
- * Feature level module holds all the bindings needed for this feature.
+ * Feature level component
  */
-@Module
-public abstract class FeatureModule {
-    @Binds abstract FeatureView provideFeatureView(FeatureActivity featureActivity);
-
-    @Provides @Named("someId") static String provideSomeId(FeatureActivity featureActivity) {
-        return featureActivity.someId;
+@Subcomponent(modules = { MainActivityModule.class })
+public interface MainActivitySubComponent extends AndroidInjector<MainActivity> {
+    @Subcomponent.Builder
+    abstract class Builder extends AndroidInjector.Builder<MainActivity> {
     }
 }

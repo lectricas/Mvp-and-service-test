@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package org.codepond.daggersample.feature;
+package org.codepond.daggersample.presentation.main.di;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import org.codepond.daggersample.presentation.main.MainActivity;
+import org.codepond.daggersample.presentation.main.mvp.MainActivityView;
 
-class FeaturePresenter {
-    private FeatureView featureView;
-    private String someId;
 
-    @Inject
-    public FeaturePresenter(FeatureView featureView, @Named("someId") String someId) {
-        this.featureView = featureView;
-        this.someId = someId;
-    }
+import dagger.Binds;
+import dagger.Module;
 
-    public void doNothing() {
-        featureView.doNothing();
-    }
+/**
+ * Feature level module holds all the bindings needed for this feature.
+ */
+@Module
+public abstract class MainActivityModule {
+
+    @Binds abstract MainActivityView provideFeatureView(MainActivity mainActivity);
+//    @Provides @Named("someId") static String provideSomeId(MainActivity mainActivity) {
+//        return mainActivity.someId;
+//    }
 }

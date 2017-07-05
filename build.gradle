@@ -6,6 +6,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.0'
+        classpath 'me.tatarka:gradle-retrolambda:3.6.1'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -20,3 +21,70 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+def supportLibraryVersion = '25.2.0'
+def lombokVersion = '1.16.14'
+// TODO check dagger-android release https://github.com/google/dagger/releases/tag/dagger-2.10-rc1
+// TODO https://google.github.io/dagger/android.html
+def multiDexVersion = '1.0.1'
+def dagger2Version = '2.11'
+def javaxAnnotationVersion = '1.0'
+def retrolambdaVersion = '2.5.1'
+def butterknifeVersion = '8.5.1'
+def glideVersion = '3.7.0'
+def moxyVersion = '1.4.5'
+def rxJava2Version = '2.0.6'
+def rxAndroidVersion = '2.0.1'
+def rxBindingVersion = '2.0.0'
+def retrofitVersion = '2.3.0'
+def okHttpVersion = '3.6.0'
+def gsonVersion = '2.8.0'
+
+def crashlyticsVersion = '2.6.7@aar'
+
+// Library versions for tests
+def jUnitVersion = '4.12'
+def mockitoVersion ='2.7.22'
+def espressoVersion = '2.2.2'
+def robolectricVersion = '3.3.2'
+def mockWebServerVersion = '2.7.5'
+
+ext.libraries = [
+        supportAppCompat               : 'com.android.support:appcompat-v7:' + supportLibraryVersion,
+        supportDesign                  : 'com.android.support:design:' + supportLibraryVersion,
+        lombok                         : 'org.projectlombok:lombok:' + lombokVersion,
+        dagger2                        : 'com.google.dagger:dagger:' + dagger2Version,
+        dagger2AnnotationProcessor     : 'com.google.dagger:dagger-compiler:' + dagger2Version,
+        dagger2Android                 : 'com.google.dagger:dagger-android-support:' + dagger2Version,
+        dagger2AndroidAnnotation       : 'com.google.dagger:dagger-android-processor:' + dagger2Version,
+        javaxAnnotation                : 'javax.annotation:jsr250-api:' + javaxAnnotationVersion,
+        moxy                           : 'com.arello-mobile:moxy:' + moxyVersion,
+        moxyCompiler                   : 'com.arello-mobile:moxy-compiler:' + moxyVersion,
+        moxyAppCompat                  : 'com.arello-mobile:moxy-app-compat:' + moxyVersion,
+        retrolambdaConfig              : 'net.orfjackal.retrolambda:retrolambda:' + retrolambdaVersion,
+        butterknife                    : 'com.jakewharton:butterknife:' + butterknifeVersion,
+        butterknifeAnnotationProcessor : 'com.jakewharton:butterknife-compiler:' + butterknifeVersion,
+        glide                          : 'com.github.bumptech.glide:glide:' + glideVersion,
+
+        rxJava2                        : 'io.reactivex.rxjava2:rxjava:' + rxJava2Version,
+        rxAndroid                      : 'io.reactivex.rxjava2:rxandroid:' + rxAndroidVersion,
+        rxBinding                      : 'com.jakewharton.rxbinding2:rxbinding:' + rxBindingVersion,
+
+        retrofit                       : 'com.squareup.retrofit2:retrofit:' + retrofitVersion,
+        retrofitAdapter                : 'com.squareup.retrofit2:adapter-rxjava2:' + retrofitVersion,
+        retrofitConverter              : 'com.squareup.retrofit2:converter-gson:' + retrofitVersion,
+        okHttpLoggingInterceptor       : 'com.squareup.okhttp3:logging-interceptor:' + okHttpVersion,
+        okHttp                         : 'com.squareup.okhttp3:okhttp:' + okHttpVersion,
+
+        crashlytics                    : 'com.crashlytics.sdk.android:crashlytics:' + crashlyticsVersion,
+
+        jUnit                          : 'junit:junit:' + jUnitVersion,
+        mockito                        : 'org.mockito:mockito-core:' + mockitoVersion,
+        espresso                       : 'com.android.support.test.espresso:espresso-core:' + espressoVersion,
+        robolectric                    : 'org.robolectric:robolectric:' + robolectricVersion,
+        retrofitMock                   : 'com.squareup.retrofit2:retrofit-mock:' + retrofitVersion,
+        mockWebServer                  : 'com.squareup.okhttp:mockwebserver:' + mockWebServerVersion,
+        okio                           : 'okio',
+        supportGroup                   : 'com.android.support',
+        supportAnnotationsModule       : 'support-annotations',
+]

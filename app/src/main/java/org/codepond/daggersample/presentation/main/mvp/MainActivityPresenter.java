@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package org.codepond.daggersample.feature;
+package org.codepond.daggersample.presentation.main.mvp;
 
-import dagger.Subcomponent;
-import dagger.android.AndroidInjector;
 
-/**
- * Feature level component
- */
-@Subcomponent(modules = { FeatureModule.class })
-public interface FeatureSubComponent extends AndroidInjector<FeatureActivity> {
-    @Subcomponent.Builder
-    abstract class Builder extends AndroidInjector.Builder<FeatureActivity> {
+import org.codepond.daggersample.presentation.base.BasePresenter;
+
+import javax.inject.Inject;
+
+class MainActivityPresenter extends BasePresenter<MainActivityView> {
+
+    private MainActivityView featureView;
+
+    @Inject
+    public MainActivityPresenter(MainActivityView featureView) {
+        this.featureView = featureView;
+    }
+
+    public void doNothing() {
+        featureView.doNothing();
     }
 }
