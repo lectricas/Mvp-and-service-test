@@ -1,36 +1,61 @@
-/*
- * Copyright 2017 Nimrod Dayan CodePond.org
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 package org.codepond.daggersample.presentation.main.mvp;
 
 
+import android.util.Log;
+import android.view.View;
+
+import org.codepond.daggersample.persistence.ForaRetrofitApi;
 import org.codepond.daggersample.presentation.base.BasePresenter;
+import org.codepond.daggersample.util.RxBus;
+
+import com.arellomobile.mvp.InjectViewState;
+import com.opentok.android.Session;
+import com.opentok.android.Stream;
+import com.opentok.android.Publisher;
+import com.opentok.android.PublisherKit;
+import com.opentok.android.Subscriber;
+import com.opentok.android.BaseVideoRenderer;
+import com.opentok.android.OpentokError;
 
 import javax.inject.Inject;
 
-class MainActivityPresenter extends BasePresenter<MainActivityView> {
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
-    private MainActivityView featureView;
+@InjectViewState
+public class MainActivityPresenter extends BasePresenter<MainActivityView> {
+
+    ForaRetrofitApi api;
+
+    RxBus bus;
 
     @Inject
-    public MainActivityPresenter(MainActivityView featureView) {
-        this.featureView = featureView;
+    public MainActivityPresenter(ForaRetrofitApi api, RxBus bus) {
+        this.api = api;
+        this.bus = bus;
     }
 
-    public void doNothing() {
-        featureView.doNothing();
+    @Override
+    public void attachView(MainActivityView view) {
+        super.attachView(view);
+        bus.toObservable()
+                .subscribe(o -> {
+                    if (o instanceof Publisher) {
+                        getViewState().onPublisherConnected(((Publisher) o).getView());
+                    } else if (o instanceof Subscriber) {
+                        getViewState().onSubscriberConnected(((Subscriber) o).getView());
+                    }
+                });
+    }
+
+    public void requestSessionCredentials() {
+        api.getSession()
+                .toObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(session -> {
+                    getViewState().onSessionObtained(session);
+                });
     }
 }

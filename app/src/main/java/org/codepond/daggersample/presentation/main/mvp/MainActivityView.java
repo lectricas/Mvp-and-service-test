@@ -16,8 +16,15 @@
 
 package org.codepond.daggersample.presentation.main.mvp;
 
+import android.view.View;
+
 import com.arellomobile.mvp.MvpView;
 
+import org.codepond.daggersample.persistence.ForaSession;
+
 public interface MainActivityView extends MvpView {
-    void doNothing();
+    void onSessionObtained(ForaSession foraSession);
+    void onPublisherConnected(View publisherView);
+
+    void onSubscriberConnected(View subscriberView);
 }

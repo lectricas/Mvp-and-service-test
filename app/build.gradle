@@ -33,14 +33,13 @@ android {
 
 dependencies {
 
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-
     annotationProcessor 'com.google.dagger:dagger-compiler:2.10'
     annotationProcessor 'com.google.dagger:dagger-android-processor:2.10'
     compile 'com.google.dagger:dagger:2.10'
-// Uncomment if you're not using support library and remove 'dagger-android-support' below
-//    compile 'com.google.dagger:dagger-android:2.10'
     compile 'com.google.dagger:dagger-android-support:2.10'
+
+    compile 'pub.devrel:easypermissions:0.4.2'
+    compile 'com.opentok.android:opentok-android-sdk:2.11.0'
 
     compile libraries.supportAppCompat
     compile libraries.supportDesign

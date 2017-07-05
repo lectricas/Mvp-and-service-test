@@ -29,7 +29,7 @@ import dagger.Module;
 @Module
 public abstract class MainActivityModule {
 
-    @Binds abstract MainActivityView provideFeatureView(MainActivity mainActivity);
+//    @Binds abstract MainActivityView provideFeatureView(MainActivity mainActivity);
 //    @Provides @Named("someId") static String provideSomeId(MainActivity mainActivity) {
 //        return mainActivity.someId;
 //    }

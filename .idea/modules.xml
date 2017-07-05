@@ -3,9 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/dagger-androidinjector.iml" filepath="$PROJECT_DIR$/dagger-androidinjector.iml" />
-      <module fileurl="file://$PROJECT_DIR$/dagger-androidinjector.iml" filepath="$PROJECT_DIR$/dagger-androidinjector.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dagger10.iml" filepath="$PROJECT_DIR$/dagger10.iml" />
     </modules>
   </component>
 </project>
