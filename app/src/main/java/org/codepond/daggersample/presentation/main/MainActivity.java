@@ -23,10 +23,13 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import com.arellomobile.mvp.MvpAppCompatActivity;
+import com.arellomobile.mvp.MvpDelegate;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.arellomobile.mvp.presenter.ProvidePresenter;
 
@@ -48,28 +51,20 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 
-public class MainActivity extends MvpAppCompatActivity implements MainActivityView,
+public class MainActivity extends AppCompatActivity implements MainActivityView,
         EasyPermissions.PermissionCallbacks {
 
     @BindView(R.id.subscriber_container)
     FrameLayout subscriberContainer;
     @BindView(R.id.publisher_container)
     FrameLayout publisherContainer;
-    private ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder binder) {
-            service = ((ConnectionService.LocalBinder) binder).getService();
-            bound = true;
-        }
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            bound = false;
-        }
-    };
+    private ServiceConnection connection;
 
     private ConnectionService service;
     private boolean bound;
+
+    MvpDelegate<? extends MainActivity> mvpDelegate;
 
     @Inject
     @InjectPresenter
@@ -84,24 +79,42 @@ public class MainActivity extends MvpAppCompatActivity implements MainActivityVi
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
+        getMvpDelegate().onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        if (getLastNonConfigurationInstance() != null) {
+            connection = ((ServiceConnection) getLastCustomNonConfigurationInstance());
+        } else {
+            connection = createServiceConnection();
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        Intent intent = new Intent(this, ConnectionService.class);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
         requestPermissions();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (bound) {
-            unbindService(connection);
-            bound = false;
+        if (!isChangingConfigurations()) {
+            unBindService();
+        }
+    }
+
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        return connection;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unBindService();
+        if (isFinishing()) {
+            getMvpDelegate().onDestroy();
         }
     }
 
@@ -109,7 +122,7 @@ public class MainActivity extends MvpAppCompatActivity implements MainActivityVi
     private void requestPermissions() {
 
         if (EasyPermissions.hasPermissions(this, Util.PERMS)) {
-            presenter.requestSessionCredentials();
+            bindService();
         } else {
             EasyPermissions.requestPermissions(this,
                     getString(R.string.rationale_video_app), Util.RC_VIDEO_APP_PERM, Util.PERMS);
@@ -118,7 +131,8 @@ public class MainActivity extends MvpAppCompatActivity implements MainActivityVi
 
     @Override
     public void onSessionObtained(ForaSession sessionCredintials) {
-        service.startSessions(sessionCredintials);
+        Log.d("MainActivity", "gotSession");
+//        service.startSessions(sessionCredintials);
     }
 
     @Override
@@ -147,5 +161,39 @@ public class MainActivity extends MvpAppCompatActivity implements MainActivityVi
 
     }
 
+    private void bindService(){
+        Intent intent = new Intent(this, ConnectionService.class);
+        getApplicationContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    }
+    private void unBindService(){
+        if (bound) {
+            getApplicationContext().unbindService(connection);
+            bound = false;
+        }
+    }
 
+    private ServiceConnection createServiceConnection() {
+        return new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder binder) {
+                service = ((ConnectionService.LocalBinder) binder).getService();
+                getMvpDelegate().onAttach();
+                bound = true;
+                Log.d("MainActivity", "connected");
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                getMvpDelegate().onDetach();
+                bound = false;
+            }
+        };
+    }
+
+    public MvpDelegate getMvpDelegate() {
+        if (mvpDelegate == null) {
+            mvpDelegate = new MvpDelegate<>(this);
+        }
+        return mvpDelegate;
+    }
 }

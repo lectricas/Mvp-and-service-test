@@ -37,8 +37,16 @@ public class MainActivityPresenter extends BasePresenter<MainActivityView> {
     }
 
     @Override
+    protected void onFirstViewAttach() {
+        super.onFirstViewAttach();
+        Log.d("MainActivityPresenter", "firstAttach");
+        requestSessionCredentials();
+    }
+
+    @Override
     public void attachView(MainActivityView view) {
         super.attachView(view);
+        Log.d("MainActivityPresenter", "attached");
         bus.toObservable()
                 .subscribe(o -> {
                     if (o instanceof Publisher) {
