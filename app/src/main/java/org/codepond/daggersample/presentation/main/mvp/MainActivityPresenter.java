@@ -19,11 +19,13 @@ import com.opentok.android.BaseVideoRenderer;
 import com.opentok.android.OpentokError;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 @InjectViewState
+@Singleton
 public class MainActivityPresenter extends BasePresenter<MainActivityView> {
 
     ForaRetrofitApi api;
@@ -34,19 +36,20 @@ public class MainActivityPresenter extends BasePresenter<MainActivityView> {
     public MainActivityPresenter(ForaRetrofitApi api, RxBus bus) {
         this.api = api;
         this.bus = bus;
-    }
 
-    @Override
-    protected void onFirstViewAttach() {
-        super.onFirstViewAttach();
-        Log.d("MainActivityPresenter", "firstAttach");
-        requestSessionCredentials();
+        api.getSession()
+                .toObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(session -> {
+                    getViewState().onSessionObtained(session);
+                });
     }
 
     @Override
     public void attachView(MainActivityView view) {
-        super.attachView(view);
         Log.d("MainActivityPresenter", "attached");
+        super.attachView(view);
         bus.toObservable()
                 .subscribe(o -> {
                     if (o instanceof Publisher) {
@@ -54,16 +57,6 @@ public class MainActivityPresenter extends BasePresenter<MainActivityView> {
                     } else if (o instanceof Subscriber) {
                         getViewState().onSubscriberConnected(((Subscriber) o).getView());
                     }
-                });
-    }
-
-    public void requestSessionCredentials() {
-        api.getSession()
-                .toObservable()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(session -> {
-                    getViewState().onSessionObtained(session);
                 });
     }
 }

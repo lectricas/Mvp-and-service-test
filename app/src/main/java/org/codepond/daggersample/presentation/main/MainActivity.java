@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView,
 
     private ConnectionService service;
     private boolean bound;
+    private Intent serviceIntent;
 
     MvpDelegate<? extends MainActivity> mvpDelegate;
 
@@ -82,37 +83,46 @@ public class MainActivity extends AppCompatActivity implements MainActivityView,
         getMvpDelegate().onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-        if (getLastNonConfigurationInstance() != null) {
-            connection = ((ServiceConnection) getLastCustomNonConfigurationInstance());
-        } else {
-            connection = createServiceConnection();
-        }
+        serviceIntent = new Intent(this, ConnectionService.class);
+        getApplicationContext().startService(serviceIntent);
+        connection = createServiceConnection();
+//        if (getLastNonConfigurationInstance() != null) {
+//            Log.d("MainActivity", "restoreFromConfig");
+//            connection = ((ServiceConnection) getLastCustomNonConfigurationInstance());
+//        } else {
+//            Log.d("MainActivity", "createNew");
+//            connection = createServiceConnection();
+//        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         requestPermissions();
+        Log.d("MainActivity", "boundStart:" + bound);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (!isChangingConfigurations()) {
+        getMvpDelegate().onDetach();
+//        if (!isChangingConfigurations()) {
             unBindService();
-        }
+//        }
+        publisherContainer.removeAllViews();
+        subscriberContainer.removeAllViews();
     }
 
-    @Override
-    public Object onRetainCustomNonConfigurationInstance() {
-        return connection;
-    }
+//    @Override
+//    public Object onRetainCustomNonConfigurationInstance() {
+//        return connection;
+//    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unBindService();
+        Log.d("MainActivity", "onDestroy");
+//        unBindService();
         if (isFinishing()) {
             getMvpDelegate().onDestroy();
         }
@@ -120,8 +130,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityView,
 
     @AfterPermissionGranted(Util.RC_VIDEO_APP_PERM)
     private void requestPermissions() {
-
         if (EasyPermissions.hasPermissions(this, Util.PERMS)) {
+            Log.d("MainActivity", "permsGranted");
             bindService();
         } else {
             EasyPermissions.requestPermissions(this,
@@ -131,18 +141,19 @@ public class MainActivity extends AppCompatActivity implements MainActivityView,
 
     @Override
     public void onSessionObtained(ForaSession sessionCredintials) {
-        Log.d("MainActivity", "gotSession");
-//        service.startSessions(sessionCredintials);
+        service.startSessions(sessionCredintials);
     }
 
     @Override
     public void onPublisherConnected(View publisherView) {
+        Log.d("MainActivity", "publisherConnected");
         publisherContainer.addView(publisherView);
     }
 
     @Override
     public void onSubscriberConnected(View subscriberView) {
-        subscriberContainer.addView(subscriberView);
+        Log.d("MainActivity", "subscriberConnected");
+//        subscriberContainer.addView(subscriberView);
     }
 
     @Override
@@ -162,9 +173,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityView,
     }
 
     private void bindService(){
-        Intent intent = new Intent(this, ConnectionService.class);
-        getApplicationContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        getApplicationContext().bindService(serviceIntent, connection, 0);
     }
+
     private void unBindService(){
         if (bound) {
             getApplicationContext().unbindService(connection);
@@ -177,13 +188,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityView,
             @Override
             public void onServiceConnected(ComponentName name, IBinder binder) {
                 service = ((ConnectionService.LocalBinder) binder).getService();
+                Log.d("MainActivity", "connected");
                 getMvpDelegate().onAttach();
                 bound = true;
-                Log.d("MainActivity", "connected");
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
+                Log.d("MainActivity", "disconnected");
                 getMvpDelegate().onDetach();
                 bound = false;
             }

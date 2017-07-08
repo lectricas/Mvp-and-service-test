@@ -27,7 +27,9 @@ public class ConnectionService extends Service implements Session.SessionListene
 
     private final IBinder binder = new LocalBinder();
 
-    private Session mSession;
+    private boolean connected;
+
+    private Session session;
     private Publisher publisher;
     private Subscriber subscriber;
 
@@ -38,6 +40,13 @@ public class ConnectionService extends Service implements Session.SessionListene
     public void onCreate() {
         AndroidInjection.inject(this);
         super.onCreate();
+        Log.d("MainConnectionService", "onCreate");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("MainConnectionService", "onDestroy");
     }
 
     @Nullable
@@ -46,25 +55,31 @@ public class ConnectionService extends Service implements Session.SessionListene
         return binder;
     }
 
-    public void startSessions(ForaSession session) {
-        mSession = new Session.Builder(this, session.getApiKey(), session.getSessionId()).build();
-        mSession.setSessionListener(this);
-        mSession.connect(session.getToken());
+    public void startSessions(ForaSession foraSession) {
+        if (!connected) {
+            session = new Session.Builder(this, foraSession.getApiKey(), foraSession.getSessionId()).build();
+            session.setSessionListener(this);
+            session.connect(foraSession.getToken());
+        }
+
     }
 
     @Override
     public void onConnected(Session session) {
+        connected = true;
         publisher = new Publisher.Builder(this).build();
         publisher.setPublisherListener(this);
 
         publisher.getRenderer().setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
                 BaseVideoRenderer.STYLE_VIDEO_FILL);
-        mSession.publish(publisher);
+        this.session.publish(publisher);
+
         bus.send(publisher);
     }
 
     @Override
     public void onDisconnected(Session session) {
+        connected = false;
         Log.d("ConnectionService", "disconnected");
     }
 
@@ -73,7 +88,7 @@ public class ConnectionService extends Service implements Session.SessionListene
         if (subscriber == null) {
             subscriber = new Subscriber.Builder(this, stream).build();
             subscriber.getRenderer().setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE, BaseVideoRenderer.STYLE_VIDEO_FILL);
-            mSession.subscribe(subscriber);
+            this.session.subscribe(subscriber);
             bus.send(subscriber);
         }
     }

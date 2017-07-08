@@ -17,8 +17,11 @@
 package org.codepond.daggersample.presentation.main.di;
 
 import org.codepond.daggersample.presentation.main.MainActivity;
+import org.codepond.daggersample.presentation.main.mvp.MainActivityPresenter;
 import org.codepond.daggersample.presentation.main.mvp.MainActivityView;
 
+
+import javax.inject.Singleton;
 
 import dagger.Binds;
 import dagger.Module;
