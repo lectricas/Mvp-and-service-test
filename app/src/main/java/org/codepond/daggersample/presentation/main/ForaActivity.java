@@ -17,7 +17,6 @@
 package org.codepond.daggersample.presentation.main;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -28,16 +27,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.arellomobile.mvp.MvpAppCompatActivity;
 import com.arellomobile.mvp.MvpDelegate;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.arellomobile.mvp.presenter.ProvidePresenter;
 
 import org.codepond.daggersample.R;
 import org.codepond.daggersample.persistence.ForaSession;
-import org.codepond.daggersample.presentation.main.mvp.MainActivityPresenter;
-import org.codepond.daggersample.presentation.main.mvp.MainActivityView;
-import org.codepond.daggersample.presentation.service.ConnectionService;
+import org.codepond.daggersample.presentation.main.mvp.ForaActivityPresenter;
+import org.codepond.daggersample.presentation.main.mvp.ForaActivityView;
+import org.codepond.daggersample.presentation.service.ForaService;
 import org.codepond.daggersample.util.Util;
 
 import java.util.List;
@@ -51,7 +49,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 
-public class MainActivity extends AppCompatActivity implements MainActivityView,
+public class ForaActivity extends AppCompatActivity implements ForaActivityView,
         EasyPermissions.PermissionCallbacks {
 
     @BindView(R.id.subscriber_container)
@@ -61,18 +59,21 @@ public class MainActivity extends AppCompatActivity implements MainActivityView,
 
     private ServiceConnection connection;
 
-    private ConnectionService service;
+    @Nullable
+    private ForaService service;
+
     private boolean bound;
     private Intent serviceIntent;
 
-    MvpDelegate<? extends MainActivity> mvpDelegate;
+    MvpDelegate<? extends ForaActivity> mvpDelegate;
 
     @Inject
     @InjectPresenter
-    MainActivityPresenter presenter;
+    ForaActivityPresenter presenter;
 
     @ProvidePresenter
-    MainActivityPresenter providesPresenter() {
+    ForaActivityPresenter providesPresenter() {
+        Log.d("ForaActivity", "presenter:" + presenter);
         return presenter;
     }
 
@@ -83,46 +84,40 @@ public class MainActivity extends AppCompatActivity implements MainActivityView,
         getMvpDelegate().onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        serviceIntent = new Intent(this, ConnectionService.class);
+        serviceIntent = new Intent(this, ForaService.class);
         getApplicationContext().startService(serviceIntent);
         connection = createServiceConnection();
-//        if (getLastNonConfigurationInstance() != null) {
-//            Log.d("MainActivity", "restoreFromConfig");
-//            connection = ((ServiceConnection) getLastCustomNonConfigurationInstance());
-//        } else {
-//            Log.d("MainActivity", "createNew");
-//            connection = createServiceConnection();
-//        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         requestPermissions();
-        Log.d("MainActivity", "boundStart:" + bound);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (service != null) {
+            service.onActivityPaused();
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         getMvpDelegate().onDetach();
-//        if (!isChangingConfigurations()) {
-            unBindService();
-//        }
+        if (!isChangingConfigurations() && service != null) {
+            service.stopSession();
+        }
+        unBindService();
         publisherContainer.removeAllViews();
         subscriberContainer.removeAllViews();
     }
 
-//    @Override
-//    public Object onRetainCustomNonConfigurationInstance() {
-//        return connection;
-//    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d("MainActivity", "onDestroy");
-//        unBindService();
         if (isFinishing()) {
             getMvpDelegate().onDestroy();
         }
@@ -131,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityView,
     @AfterPermissionGranted(Util.RC_VIDEO_APP_PERM)
     private void requestPermissions() {
         if (EasyPermissions.hasPermissions(this, Util.PERMS)) {
-            Log.d("MainActivity", "permsGranted");
             bindService();
         } else {
             EasyPermissions.requestPermissions(this,
@@ -141,18 +135,22 @@ public class MainActivity extends AppCompatActivity implements MainActivityView,
 
     @Override
     public void onSessionObtained(ForaSession sessionCredintials) {
-        service.startSessions(sessionCredintials);
+        Log.d("ForaActivity", "sessionObtained");
+        if (service != null) {
+            Log.d("ForaActivity", "startSession");
+            service.startSessions(sessionCredintials);
+        }
     }
 
     @Override
     public void onPublisherConnected(View publisherView) {
-        Log.d("MainActivity", "publisherConnected");
+        Log.d("ForaActivity", "publisherConnected");
         publisherContainer.addView(publisherView);
     }
 
     @Override
     public void onSubscriberConnected(View subscriberView) {
-        Log.d("MainActivity", "subscriberConnected");
+        Log.d("ForaActivity", "subscriberConnected");
 //        subscriberContainer.addView(subscriberView);
     }
 
@@ -187,15 +185,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityView,
         return new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder binder) {
-                service = ((ConnectionService.LocalBinder) binder).getService();
-                Log.d("MainActivity", "connected");
+                service = ((ForaService.LocalBinder) binder).getService();
+                Log.d("ForaActivity", "ServiceConnectionConnected");
                 getMvpDelegate().onAttach();
                 bound = true;
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                Log.d("MainActivity", "disconnected");
+                Log.d("ForaActivity", "disconnected");
                 getMvpDelegate().onDetach();
                 bound = false;
             }

@@ -1,14 +1,14 @@
 package org.codepond.daggersample.presentation.main.di;
 
-import org.codepond.daggersample.presentation.main.MainActivity;
+import org.codepond.daggersample.presentation.main.ForaActivity;
 
 import dagger.Subcomponent;
 import dagger.android.AndroidInjector;
 
 
-@Subcomponent(modules = { MainActivityModule.class })
-public interface MainActivitySubComponent extends AndroidInjector<MainActivity> {
+@Subcomponent(modules = { ForaActivityModule.class })
+public interface MainActivitySubComponent extends AndroidInjector<ForaActivity> {
     @Subcomponent.Builder
-    abstract class Builder extends AndroidInjector.Builder<MainActivity> {
+    abstract class Builder extends AndroidInjector.Builder<ForaActivity> {
     }
 }

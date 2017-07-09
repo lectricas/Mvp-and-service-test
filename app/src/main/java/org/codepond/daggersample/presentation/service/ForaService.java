@@ -23,7 +23,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 
-public class ConnectionService extends Service implements Session.SessionListener, PublisherKit.PublisherListener {
+public class ForaService extends Service implements Session.SessionListener, PublisherKit.PublisherListener {
 
     private final IBinder binder = new LocalBinder();
 
@@ -40,13 +40,11 @@ public class ConnectionService extends Service implements Session.SessionListene
     public void onCreate() {
         AndroidInjection.inject(this);
         super.onCreate();
-        Log.d("MainConnectionService", "onCreate");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d("MainConnectionService", "onDestroy");
     }
 
     @Nullable
@@ -60,8 +58,18 @@ public class ConnectionService extends Service implements Session.SessionListene
             session = new Session.Builder(this, foraSession.getApiKey(), foraSession.getSessionId()).build();
             session.setSessionListener(this);
             session.connect(foraSession.getToken());
+        } else {
+            session.onResume();
         }
+    }
 
+    public void onActivityPaused() {
+        Log.d("ForaService", "activityPaused");
+        session.onPause();
+    }
+
+    public void stopSession() {
+        session.disconnect();
     }
 
     @Override
@@ -80,7 +88,7 @@ public class ConnectionService extends Service implements Session.SessionListene
     @Override
     public void onDisconnected(Session session) {
         connected = false;
-        Log.d("ConnectionService", "disconnected");
+        Log.d("ForaService", "disconnected");
     }
 
     @Override
@@ -95,12 +103,12 @@ public class ConnectionService extends Service implements Session.SessionListene
 
     @Override
     public void onStreamDropped(Session session, Stream stream) {
-        Log.d("ConnectionService", "dropped");
+        Log.d("ForaService", "dropped");
     }
 
     @Override
     public void onError(Session session, OpentokError opentokError) {
-        Log.d("ConnectionService", opentokError.getMessage());
+        Log.d("ForaService", opentokError.getMessage());
     }
 
     @Override
@@ -119,8 +127,8 @@ public class ConnectionService extends Service implements Session.SessionListene
     }
 
     public class LocalBinder extends Binder {
-        public ConnectionService getService() {
-            return ConnectionService.this;
+        public ForaService getService() {
+            return ForaService.this;
         }
     }
 }

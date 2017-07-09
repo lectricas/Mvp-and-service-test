@@ -19,10 +19,13 @@ package org.codepond.daggersample.presentation.main.mvp;
 import android.view.View;
 
 import com.arellomobile.mvp.MvpView;
+import com.arellomobile.mvp.viewstate.strategy.AddToEndSingleStrategy;
+import com.arellomobile.mvp.viewstate.strategy.StateStrategyType;
 
 import org.codepond.daggersample.persistence.ForaSession;
 
-public interface MainActivityView extends MvpView {
+@StateStrategyType(AddToEndSingleStrategy.class)
+public interface ForaActivityView extends MvpView {
     void onSessionObtained(ForaSession foraSession);
     void onPublisherConnected(View publisherView);
 
