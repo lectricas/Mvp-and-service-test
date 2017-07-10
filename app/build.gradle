@@ -5,7 +5,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
-        applicationId "org.codepond.daggersample"
+        applicationId "org.lectricas.toktest"
         minSdkVersion 19
         targetSdkVersion 25
         versionCode 1
@@ -32,20 +32,15 @@ android {
 }
 
 dependencies {
-
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.10'
-    annotationProcessor 'com.google.dagger:dagger-android-processor:2.10'
-    compile 'com.google.dagger:dagger:2.10'
-    compile 'com.google.dagger:dagger-android-support:2.10'
-
-    compile 'pub.devrel:easypermissions:0.4.2'
-    compile 'com.opentok.android:opentok-android-sdk:2.11.0'
-
     compile libraries.supportAppCompat
     compile libraries.supportDesign
 
-    compile libraries.lombok
+    compile libraries.dagger2
+    compile libraries.dagger2Android
+    annotationProcessor libraries.dagger2AnnotationProcessor
+    annotationProcessor libraries.dagger2AndroidAnnotation
 
+    compile libraries.lombok
 
     provided libraries.javaxAnnotation
 
@@ -65,4 +60,7 @@ dependencies {
     compile libraries.retrofitAdapter
     compile libraries.retrofitConverter
     compile libraries.okHttpLoggingInterceptor
+
+    compile libraries.easyPermissions
+    compile libraries.openTok
 }

@@ -1,28 +1,17 @@
-Android Dagger 2.10 AndroidInjector sample
+MVP(moxy) plus Service(Android) inplementation
 =
+The test app demonstrates the capabilities of OpenTok android sdk
 
-This sample is part of a [tutorial](https://medium.com/@nimroddayan/android-and-dagger-2-10-androidinjector-5e9c523679a3) how to use the new [dagger-android](https://google.github.io/dagger/android.html) module, which was released in Dagger 2.10.
+How to use:
 
-Dagger 2.10 introduced dagger-android, a new module specifically for Android that comes in addition to the main dagger module and compiler. In this tutorial we will go through the steps needed to get started with the new module — assuming you’re already familiar with Dagger.
-This tutorial is focused on Activity injection, but might as well serve as a reference for other Android components.
-
-The sample demonstrates key points when working with Dagger in the context of MVP:
-
-* How to inject an Activity
-* How to bind the activity where a View is requested
-* How to bind @Named arguments that are passed from the activity and provide them in the Presenter
-
-Kotlin
--
-
-This sample is also written in Kotlin in a separate branch 'kotlin'.
+* Simply clone and import into Android Studio and you are ready to go.
 
 License
 -
 
 
 ```
-Copyright 2017 Nimrod Dayan CodePond.org
+Copyright 2017 Alexey Polusov
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

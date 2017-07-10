@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="org.codepond.daggersample"
+<manifest package="org.lectricas.toktest"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".App"
+        android:name="com.lectricas.toktest.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -14,7 +14,7 @@
         android:theme="@style/AppTheme">
 
 
-        <activity android:name=".presentation.main.ForaActivity">
+        <activity android:name="com.lectricas.toktest.presentation.main.ForaActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -22,6 +22,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".presentation.service.ForaService"/>
+        <service android:name="com.lectricas.toktest.presentation.service.ForaService"/>
     </application>
 </manifest>

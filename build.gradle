@@ -27,10 +27,8 @@ task clean(type: Delete) {
 
 def supportLibraryVersion = '25.2.0'
 def lombokVersion = '1.16.14'
-// TODO check dagger-android release https://github.com/google/dagger/releases/tag/dagger-2.10-rc1
-// TODO https://google.github.io/dagger/android.html
-def multiDexVersion = '1.0.1'
-def dagger2Version = '2.11'
+
+def dagger2Version = '2.10'
 def javaxAnnotationVersion = '1.0'
 def retrolambdaVersion = '2.5.1'
 def butterknifeVersion = '8.5.1'
@@ -41,9 +39,12 @@ def rxAndroidVersion = '2.0.1'
 def rxBindingVersion = '2.0.0'
 def retrofitVersion = '2.3.0'
 def okHttpVersion = '3.6.0'
-def gsonVersion = '2.8.0'
 
 def crashlyticsVersion = '2.6.7@aar'
+
+def easyPermissionsVersion = '0.4.2'
+def openTokVersion = '2.11.0'
+
 
 // Library versions for tests
 def jUnitVersion = '4.12'
@@ -78,6 +79,9 @@ ext.libraries = [
         retrofitConverter              : 'com.squareup.retrofit2:converter-gson:' + retrofitVersion,
         okHttpLoggingInterceptor       : 'com.squareup.okhttp3:logging-interceptor:' + okHttpVersion,
         okHttp                         : 'com.squareup.okhttp3:okhttp:' + okHttpVersion,
+
+        openTok                        : 'pub.devrel:easypermissions:' + easyPermissionsVersion,
+        easyPermissions                : 'com.opentok.android:opentok-android-sdk:' + openTokVersion,
 
         crashlytics                    : 'com.crashlytics.sdk.android:crashlytics:' + crashlyticsVersion,
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Dagger Sample</string>
+    <string name="app_name">Tok Test</string>
 
     <string name="title_settings_dialog">Permissions Required</string>
     <string name="rationale_video_app">This app needs access to your camera and mic to make video calls</string>
