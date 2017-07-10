@@ -4,8 +4,10 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 
+import com.lectricas.toktest.presentation.service.event.ServiceCallbacks;
 import com.opentok.android.BaseVideoRenderer;
 import com.opentok.android.OpentokError;
 import com.opentok.android.Publisher;
@@ -15,10 +17,9 @@ import com.opentok.android.Stream;
 import com.opentok.android.Subscriber;
 
 import com.lectricas.toktest.persistence.ForaRetrofitApi;
-import com.lectricas.toktest.presentation.service.event.PublisherConnectedEvent;
-import com.lectricas.toktest.presentation.service.event.StreamDroppedBySubscriberEvent;
-import com.lectricas.toktest.presentation.service.event.SubscriberConnectedEvent;
-import com.lectricas.toktest.util.RxBus;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import javax.inject.Inject;
 
@@ -32,18 +33,21 @@ public class ForaService extends Service implements Session.SessionListener, Pub
 
     private final IBinder binder = new LocalBinder();
 
-    private boolean connected;
-
     Disposable disposableGetServerSession;
+
+    private int status;
+
+    @Nullable
+    Subscriber subscriber;
+
+    @Nullable
+    Publisher publisher;
 
     @Nullable
     private Session session;
 
-    private Publisher publisher;
-    private Subscriber subscriber;
-
-    @Inject
-    RxBus bus;
+    @Nullable
+    ServiceCallbacks callbacks;
 
     @Inject
     ForaRetrofitApi api;
@@ -57,6 +61,7 @@ public class ForaService extends Service implements Session.SessionListener, Pub
     @Override
     public void onDestroy() {
         super.onDestroy();
+        disposableGetServerSession.dispose();
     }
 
     @Nullable
@@ -65,73 +70,94 @@ public class ForaService extends Service implements Session.SessionListener, Pub
         return binder;
     }
 
-    public void startSessions() {
-        if (!connected) {
+    public void startSessions(ServiceCallbacks callbacks) {
+        this.callbacks = callbacks;
+        if (session == null || status == Status.DISCONNECTED ||
+                status == Status.DISCONNECTING) {
             disposableGetServerSession = api.getSession()
-                    .toObservable()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(foraSession -> {
                         session = new Session.Builder(this, foraSession.getApiKey(), foraSession.getSessionId()).build();
                         session.setSessionListener(this);
                         session.connect(foraSession.getToken());
-                    }, throwable -> {
-                        bus.sendError(throwable);
-                    });
-        } else if (session != null) {
+                        status = Status.CONNECTING;
+                    }, callbacks::onError);
+        } else {
             session.onResume();
+            if (publisher != null) {
+                callbacks.onPublisherConnected(publisher.getView());
+            }
+
+            if (subscriber != null) {
+                callbacks.onSubscriberConnected(subscriber.getView());
+            }
         }
     }
 
     public void onActivityPaused() {
-        disposableGetServerSession.dispose();
         if (session != null) {
             session.onPause();
         }
     }
 
     public void stopSession() {
+        callbacks = null;
         if (session != null) {
             session.disconnect();
+            session = null;
+            status = Status.DISCONNECTING;
         }
     }
 
     @Override
     public void onConnected(Session session) {
-        connected = true;
+        status = Status.CONNECTED;
+
         publisher = new Publisher.Builder(this).build();
         publisher.setPublisherListener(this);
+        publisher.setPublishAudio(false);
 
         publisher.getRenderer().setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
                 BaseVideoRenderer.STYLE_VIDEO_FILL);
         session.publish(publisher);
 
-        bus.send(new PublisherConnectedEvent(publisher.getView()));
+        if (callbacks != null) {
+            callbacks.onPublisherConnected(publisher.getView());
+        }
     }
 
     @Override
     public void onDisconnected(Session session) {
-        connected = false;
+        status = Status.DISCONNECTED;
+        publisher = null;
+        subscriber = null;
     }
 
     @Override
     public void onStreamReceived(Session session, Stream stream) {
-        // TODO: 09-Jul-17 black Screen if subscriber is not reinitilized
-//        if (subscriber == null) {
+
         subscriber = new Subscriber.Builder(this, stream).build();
         subscriber.getRenderer().setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE, BaseVideoRenderer.STYLE_VIDEO_FILL);
         session.subscribe(subscriber);
-        bus.send(new SubscriberConnectedEvent(subscriber.getView()));
+
+        if (callbacks != null) {
+            callbacks.onSubscriberConnected(subscriber.getView());
+        }
     }
 
     @Override
     public void onStreamDropped(Session session, Stream stream) {
-        bus.send(new StreamDroppedBySubscriberEvent());
+        if (callbacks != null) {
+            callbacks.onStreamDropped();
+        }
     }
 
     @Override
     public void onError(Session session, OpentokError opentokError) {
-        bus.send(opentokError);
+        if (callbacks != null) {
+            callbacks.onOpenTokError(opentokError);
+        }
     }
 
     @Override
@@ -146,12 +172,23 @@ public class ForaService extends Service implements Session.SessionListener, Pub
 
     @Override
     public void onError(PublisherKit publisherKit, OpentokError opentokError) {
-        bus.send(opentokError);
+        if (callbacks != null) {
+            callbacks.onOpenTokError(opentokError);
+        }
     }
 
     public class LocalBinder extends Binder {
         public ForaService getService() {
             return ForaService.this;
         }
+    }
+
+    @IntDef({Status.CONNECTED, Status.DISCONNECTED, Status.CONNECTING, Status.DISCONNECTING})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Status {
+        int CONNECTED = 1;
+        int DISCONNECTED = 0;
+        int CONNECTING = 2;
+        int DISCONNECTING = 3;
     }
 }

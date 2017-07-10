@@ -18,7 +18,10 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 
-@Module(subcomponents = { MainActivitySubComponent.class, ForaServiceSubComponent.class })
+@Module(subcomponents = {
+        MainActivitySubComponent.class,
+        ForaServiceSubComponent.class,
+})
 public class AppModule {
 
     @Provides

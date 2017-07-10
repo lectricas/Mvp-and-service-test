@@ -1,25 +1,26 @@
 package com.lectricas.toktest.presentation.main;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
-import com.arellomobile.mvp.MvpDelegate;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.arellomobile.mvp.presenter.ProvidePresenter;
 import com.lectricas.toktest.presentation.service.ForaService;
 
 import com.lectricas.toktest.presentation.main.mvp.ForaActivityPresenter;
 import com.lectricas.toktest.presentation.main.mvp.ForaActivityView;
+import com.lectricas.toktest.presentation.service.event.ServiceCallbacks;
 import com.lectricas.toktest.util.Util;
+import com.opentok.android.OpentokError;
 
 import org.lectricas.toktest.R;
 
@@ -34,7 +35,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 
-public class ForaActivity extends AppCompatActivity implements ForaActivityView,
+public class ForaActivity extends AppCompatActivity implements ForaActivityView, ServiceCallbacks,
         EasyPermissions.PermissionCallbacks {
 
     @BindView(R.id.subscriber_container)
@@ -50,8 +51,6 @@ public class ForaActivity extends AppCompatActivity implements ForaActivityView,
     private boolean bound;
     private Intent serviceIntent;
 
-    MvpDelegate<? extends ForaActivity> mvpDelegate;
-
     @Inject
     @InjectPresenter
     ForaActivityPresenter presenter;
@@ -65,7 +64,6 @@ public class ForaActivity extends AppCompatActivity implements ForaActivityView,
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        getMvpDelegate().onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         serviceIntent = new Intent(this, ForaService.class);
@@ -76,7 +74,6 @@ public class ForaActivity extends AppCompatActivity implements ForaActivityView,
     @Override
     protected void onStart() {
         super.onStart();
-        getMvpDelegate().onAttach();
         requestPermissions();
     }
 
@@ -91,7 +88,6 @@ public class ForaActivity extends AppCompatActivity implements ForaActivityView,
     @Override
     protected void onStop() {
         super.onStop();
-        getMvpDelegate().onDetach();
         if (!isChangingConfigurations() && service != null) {
             service.stopSession();
         }
@@ -110,7 +106,6 @@ public class ForaActivity extends AppCompatActivity implements ForaActivityView,
         super.onDestroy();
         if (isFinishing()) {
             stopService(serviceIntent);
-            getMvpDelegate().onDestroy();
         }
     }
 
@@ -131,7 +126,6 @@ public class ForaActivity extends AppCompatActivity implements ForaActivityView,
 
     @Override
     public void onSubscriberConnected(View subscriberView) {
-        // TODO: 10-Jul-17 no publisher container upfront on rotation
         subscriberContainer.addView(subscriberView);
     }
 
@@ -167,27 +161,24 @@ public class ForaActivity extends AppCompatActivity implements ForaActivityView,
             @Override
             public void onServiceConnected(ComponentName name, IBinder binder) {
                 service = ((ForaService.LocalBinder) binder).getService();
-                service.startSessions();
+                service.startSessions(ForaActivity.this);
                 bound = true;
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                getMvpDelegate().onDetach();
                 bound = false;
             }
         };
     }
 
-    public MvpDelegate getMvpDelegate() {
-        if (mvpDelegate == null) {
-            mvpDelegate = new MvpDelegate<>(this);
-        }
-        return mvpDelegate;
+    @Override
+    public void onError(Throwable throwable) {
+        Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onError(Throwable throwable) {
+    public void onOpenTokError(OpentokError throwable) {
         Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
     }
 }

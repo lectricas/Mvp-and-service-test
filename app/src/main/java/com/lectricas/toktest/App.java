@@ -3,12 +3,14 @@ package com.lectricas.toktest;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Service;
+import android.util.Log;
 
 import javax.inject.Inject;
 
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasDispatchingActivityInjector;
 import dagger.android.HasDispatchingServiceInjector;
+import io.reactivex.plugins.RxJavaPlugins;
 
 
 public class App extends Application implements HasDispatchingActivityInjector, HasDispatchingServiceInjector {
@@ -18,6 +20,8 @@ public class App extends Application implements HasDispatchingActivityInjector, 
 
     @Override
     public void onCreate() {
+
+
         super.onCreate();
         DaggerAppComponent
                 .builder()
