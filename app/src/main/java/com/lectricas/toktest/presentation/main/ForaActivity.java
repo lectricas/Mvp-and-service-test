@@ -126,13 +126,11 @@ public class ForaActivity extends AppCompatActivity implements ForaActivityView,
 
     @Override
     public void onPublisherConnected(View publisherView) {
-        Log.d("ForaActivity", "publisher");
         publisherContainer.addView(publisherView);
     }
 
     @Override
     public void onSubscriberConnected(View subscriberView) {
-        Log.d("ForaActivity", "subscriber");
         // TODO: 10-Jul-17 no publisher container upfront on rotation
         subscriberContainer.addView(subscriberView);
     }
