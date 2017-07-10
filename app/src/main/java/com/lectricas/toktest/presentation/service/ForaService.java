@@ -76,7 +76,7 @@ public class ForaService extends Service implements Session.SessionListener, Pub
                         session.setSessionListener(this);
                         session.connect(foraSession.getToken());
                     }, throwable -> {
-                        bus.sendError(new RuntimeException(throwable));
+                        bus.sendError(throwable);
                     });
         } else if (session != null) {
             session.onResume();
@@ -131,7 +131,7 @@ public class ForaService extends Service implements Session.SessionListener, Pub
 
     @Override
     public void onError(Session session, OpentokError opentokError) {
-        // TODO: 10-Jul-17 errorHandling
+        bus.send(opentokError);
     }
 
     @Override
@@ -146,6 +146,7 @@ public class ForaService extends Service implements Session.SessionListener, Pub
 
     @Override
     public void onError(PublisherKit publisherKit, OpentokError opentokError) {
+        bus.send(opentokError);
     }
 
     public class LocalBinder extends Binder {
