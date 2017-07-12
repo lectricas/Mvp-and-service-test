@@ -1,4 +1,4 @@
-MVP(moxy) plus Service(Android) inplementation
+OpenTok simple application.
 =
 The test app demonstrates the capabilities of OpenTok android sdk
 
